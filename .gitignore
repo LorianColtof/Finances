@@ -1,0 +1,5 @@
+*.csv
+*.journal
+.import_csv_tracking
+__pycache__
+.mypy_cache
