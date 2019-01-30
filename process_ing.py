@@ -104,9 +104,9 @@ class TrackingFile:
                           for s in (l.strip().split(':')
                           for l in f)}
                 self._current_id = values[import_filename] \
-                    if import_filename in values else 0
+                    if import_filename in values else -1
         else:
-            self._current_id = 0
+            self._current_id = -1
             with open(self.fn, 'w') as f:
                 f.write('{}:{}\n'.format(self.import_filename,
                                          self._current_id))
@@ -127,6 +127,7 @@ class TrackingFile:
                     data += line
 
             f.seek(0)
+            f.truncate()
             f.write(data)
 
 
@@ -141,7 +142,7 @@ class CSVProcessor:
         reader = csv.DictReader(self.input_csv)
 
         now = dt.now().strftime("%Y-%m-%d %H:%m:%S")
-        if self.tracking_file.current_id == 0:
+        if self.tracking_file.current_id == -1:
             self.output_journal.write(
                 f"; journal created on {now} by CSV import script\n\n")
         else:
@@ -169,7 +170,7 @@ class CSVProcessor:
         # Process the entries ordened by date
         for date, amount, name, comment in sorted(
                 raw_entries, key=lambda e: e[0])[
-                    self.tracking_file.current_id:]:
+                    transaction_id:]:
 
             entry = self.convert_transaction(amount, name, comment, date,
                                              transaction_id)
