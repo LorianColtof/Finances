@@ -21,10 +21,12 @@ Account = namedtuple('Account', ['name', 'value'])
 class AssetAccounts(Enum):
     BANK_PAYMENT_ACCOUNT = 'Assets:Bank:Payment account'
     BANK_SAVINGS = 'Assets:Bank:Savings'
+    BANK_CREDITCARD = 'Assets:Bank:Creditcard'
 
 
 class ExpenseAccounts(Enum):
     FOOD_AND_GROCERIES = 'Expenses:Food and groceries'
+    ALCOHOL = 'Expenses:Alcohol'
     PHONE_SUBSCRIPTION = 'Expenses:Phone:Subscription'
     DONATIONS = 'Expenses:Donations'
     PUBLIC_TRANSPORT = 'Expenses:Public transport'
@@ -33,6 +35,10 @@ class ExpenseAccounts(Enum):
     HEALTH_INSURANCE = 'Expenses:Insurance:Health'
     LIABILITY_INSURANCE = 'Expenses:Insurance:Liability'
     OTHER_INSURANCE = 'Expenses:Insurance:Other'
+    SPORT = 'Expenses:Sport'
+    HAIRDRESSER = 'Expenses:Hairdresser'
+    TUITION_FEES = 'Expenses:Tuition fees'
+    TAX = 'Expenses:Tax'
     MISC = 'Expenses:Miscellaneous'
 
 
@@ -42,6 +48,9 @@ class IncomeAccounts(Enum):
     RENT_ALLOWANCE = 'Income:Allowance:Rent'
     HEALTH_ALLOWANCE = 'Income:Allowance:Health'
     GIFTS = 'Income:Gifts'
+    REPAYMENTS = 'Income:Repayments'
+    BOARD_GRANT = 'Income:Board grant'
+    STUDENT_GRANTS_LOANS = 'Income:DUO student grants and loans'
     OTHER = 'Income:Other'
 
 
@@ -86,8 +95,8 @@ class JournalEntry:
         for account in [self.account1, self.account2,
                         self.account3, self.account4]:
             if account:
-                s += "   {:<40s}€{:.2f}\n".format(account.name.value,
-                                                  account.value)
+                s += "    {:<40s}€{:.2f}\n".format(account.name.value,
+                                                   account.value)
 
         s += "\n"
         return s
@@ -204,6 +213,11 @@ class CSVProcessor:
             short_description), fg='blue', bold=True))
         click.echo("\tAmount:       " + click.style("€{:.2f}".format(amount),
                                                     fg='blue', bold=True))
+        direction = click.style("Income", fg='green', bold=True) \
+            if amount > 0 else \
+            click.style("Expense", fg='red', bold=True)
+
+        click.echo("\tDirection:    " + direction)
 
         entry = JournalEntry(date, '{} - {}'.format(
             full_trans_id, description))
@@ -212,14 +226,46 @@ class CSVProcessor:
         ask = False
         unknown = False
 
+        food_keywords = [
+            'eten',
+            'gnocchi',
+            'pasta',
+            'wraps',
+            'thais',
+            'indiaas',
+            'roti',
+            'pizza',
+            'lasagne',
+            'risotto',
+            'chinees',
+            'sushi',
+            'wok'
+        ]
+
         if self.match(description, 'spaarrekening'):
             account2: Enum = AssetAccounts.BANK_SAVINGS
 
         # === Expenses
         elif amount < 0:
 
-            if self.match(description, 'Albert Heijn',
-                          'Spar sciencepark', 'UvAScience'):
+            if self.match(description,
+                          'Albert Heijn',
+                          'AH to Go',
+                          'AH togo',
+                          'AH Station',
+                          'Lidl',
+                          'Jumbo',
+                          'Dirk',
+                          'Spar sciencepark',
+                          'UvAScience',
+                          'Fuameh',
+                          'Smullers',
+                          'McDonald(?:\'|\s)?s',
+                          r'\bMcD\b',
+                          'Broodzaak',
+                          r"Julia'?s",
+                          'Thuisbezorgd',
+                          *food_keywords):
                 account2 = ExpenseAccounts.FOOD_AND_GROCERIES
 
             elif self.match(description,
@@ -228,6 +274,19 @@ class CSVProcessor:
                 account2 = ExpenseAccounts.FOOD_AND_GROCERIES
                 if not self.match(description, 'Afschrijving POS'):
                     ask = True
+
+            elif self.match(description,
+                            'Maslow',
+                            'DE HEEREN VAN AEMS',
+                            'Gall & Gall',
+                            'Jeda Horeca',  # De Gieter
+                            'HOTSHOTS',
+                            'Bier',
+                            'Wodka'):
+                account2 = ExpenseAccounts.ALCOHOL
+
+            elif self.match(description, 'Incasso Creditcard'):
+                account2 = AssetAccounts.BANK_CREDITCARD
 
             elif self.match(description, 'SIMYO'):
                 account2 = ExpenseAccounts.PHONE_SUBSCRIPTION
@@ -254,8 +313,27 @@ class CSVProcessor:
             elif self.match(description, 'AEGON'):
                 account2 = ExpenseAccounts.LIABILITY_INSURANCE
 
+            elif self.match(description, 'Sportexpl.mij'):  # = USC
+                account2 = ExpenseAccounts.SPORT
+
+            elif self.match(description, 'Basic Kappers'):
+                account2 = ExpenseAccounts.HAIRDRESSER
+
+            elif self.match(description, 'Belastingdienst'):
+                account2 = ExpenseAccounts.TAX
+
+            elif self.match(description, 'Universiteit van Amsterdam') and \
+                    abs(amount) >= 1900:
+                account2 = ExpenseAccounts.TUITION_FEES
+
             elif self.match(description, 'Betaalverzoek'):
                 account2 = ExpenseAccounts.FOOD_AND_GROCERIES
+                ask = True
+
+            elif self.match(description,
+                            r'\bCafe\b',
+                            'bier'):
+                account2 = ExpenseAccounts.ALCOHOL
                 ask = True
 
             else:
@@ -270,13 +348,29 @@ class CSVProcessor:
             elif self.match(description, 'HET ZWARTE FIETSENPLAN'):
                 account2 = IncomeAccounts.SALARY_HZFP
 
+            elif self.match(description,
+                            r'\bDUO\b',
+                            'Dienst Uitvoering Onderwijs',
+                            'Studiefinanciering'):
+                account2 = IncomeAccounts.STUDENT_GRANTS_LOANS
+
             elif self.match(description, 'Huurtoeslag'):
                 account2 = IncomeAccounts.RENT_ALLOWANCE
 
             elif self.match(description, 'Zorgtoeslag'):
                 account2 = IncomeAccounts.HEALTH_ALLOWANCE
 
-            elif self.match(description, 'Betaalverzoek'):
+            elif self.match(description, 'Universiteit van Amsterdam'):
+                account2 = IncomeAccounts.BOARD_GRANT
+
+                if amount != 275:
+                    ask = True
+
+            elif self.match(description, 'Betaalverzoek') and \
+                    self.match(description, *food_keywords):
+                account2 = ExpenseAccounts.FOOD_AND_GROCERIES
+
+            elif self.match(description, *food_keywords):
                 account2 = ExpenseAccounts.FOOD_AND_GROCERIES
                 ask = True
 
