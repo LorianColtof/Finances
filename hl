@@ -1,0 +1,9 @@
+#!/bin/bash
+
+files=""
+
+for f in data/$1/*.journal; do
+    files="$files -f $f"
+done
+
+hledger $files ${@:2}
