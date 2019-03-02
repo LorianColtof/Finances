@@ -29,6 +29,7 @@ class ExpenseAccounts(Enum):
     TUITION_FEES = 'Expenses:Tuition fees'
     TAX = 'Expenses:Tax'
     MISC = 'Expenses:Miscellaneous'
+    REPAYMENTS = 'Expenses:Repayments'
 
 
 class IncomeAccounts(Enum):
@@ -37,7 +38,6 @@ class IncomeAccounts(Enum):
     RENT_ALLOWANCE = 'Income:Allowance:Rent'
     HEALTH_ALLOWANCE = 'Income:Allowance:Health'
     GIFTS = 'Income:Gifts'
-    REPAYMENTS = 'Income:Repayments'
     BOARD_GRANT = 'Income:Board grant'
     STUDENT_GRANTS_LOANS = 'Income:DUO student grants and loans'
     INVESTMENT_FUND_RETURN = 'Income:Investment fund return'
