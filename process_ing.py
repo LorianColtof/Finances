@@ -14,7 +14,7 @@ from prompt_toolkit.completion import FuzzyWordCompleter
 from prompt_toolkit.validation import Validator
 from prompt_toolkit.styles import Style
 
-from util import Account, AssetAccounts, ExpenseAccounts, \
+from util import Account, AssetAccounts, ExpenseAccounts, MiscAccounts,
     IncomeAccounts, JournalEntry
 
 
@@ -152,6 +152,8 @@ class CSVProcessor:
             'roti',
             'pizza',
             'lasagne',
+            'stamppot',
+            'boerenkool',
             'risotto',
             'chinees',
             'sushi',
@@ -195,6 +197,7 @@ class CSVProcessor:
                             'Maslow',
                             'DE HEEREN VAN AEMS',
                             'Gall & Gall',
+                            'Chupitos',
                             'Jeda Horeca',  # De Gieter
                             'HOTSHOTS',
                             'Bier',
@@ -202,7 +205,7 @@ class CSVProcessor:
                 account2 = ExpenseAccounts.ALCOHOL
 
             elif self.match(description, 'Incasso Creditcard'):
-                account2 = AssetAccounts.BANK_CREDITCARD
+                account2 = MiscAccounts.TRANSFER
 
             elif self.match(description, 'SIMYO'):
                 account2 = ExpenseAccounts.PHONE_SUBSCRIPTION
@@ -210,7 +213,9 @@ class CSVProcessor:
             elif self.match(description, 'UNICEF'):
                 account2 = ExpenseAccounts.DONATIONS
 
-            elif self.match(description, r'\bNS\b'):
+            elif self.match(description,
+                            r'\bNS\b',
+                            'OV-Chipkaart'):
                 account2 = ExpenseAccounts.PUBLIC_TRANSPORT
 
             elif self.match(description, 'Transip'):
@@ -237,6 +242,14 @@ class CSVProcessor:
 
             elif self.match(description, 'Belastingdienst'):
                 account2 = ExpenseAccounts.TAX
+
+            elif self.match(description, 'Infomedics'):
+                account2 = ExpenseAccounts.DENTIST
+
+            elif self.match(description,
+                            r'H\s?&\s?M',
+                            r'van\s?Haren'):
+                account2 = ExpenseAccounts.CLOTHING
 
             elif self.match(description, 'Universiteit van Amsterdam') and \
                     abs(amount) >= 1900:
@@ -268,7 +281,7 @@ class CSVProcessor:
                             r'\bDUO\b',
                             'Dienst Uitvoering Onderwijs',
                             'Studiefinanciering'):
-                account2 = IncomeAccounts.STUDENT_GRANTS_LOANS
+                account2 = IncomeAccounts.STUDENT_GRANTS
 
             elif self.match(description, 'Huurtoeslag'):
                 account2 = IncomeAccounts.RENT_ALLOWANCE
@@ -327,12 +340,14 @@ class CSVProcessor:
                     all_accounts = [e.value for e in
                                     list(AssetAccounts) +
                                     list(ExpenseAccounts) +
-                                    list(IncomeAccounts)]
+                                    list(IncomeAccounts) +
+                                    list(MiscAccounts)]
 
                     accounts_dict = {e.value: e for e in
-                                     list(AssetAccounts) +
-                                     list(ExpenseAccounts) +
-                                     list(IncomeAccounts)}
+                                    list(AssetAccounts) +
+                                    list(ExpenseAccounts) +
+                                    list(IncomeAccounts) +
+                                    list(MiscAccounts)]
 
                     completer = FuzzyWordCompleter(words=all_accounts)
 

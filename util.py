@@ -23,10 +23,12 @@ class ExpenseAccounts(Enum):
     RENT = 'Expenses:Room:Rent'
     HEALTH_INSURANCE = 'Expenses:Insurance:Health'
     LIABILITY_INSURANCE = 'Expenses:Insurance:Liability'
+    CLOTHING = 'Expenses:Clothing'
     OTHER_INSURANCE = 'Expenses:Insurance:Other'
     SPORT = 'Expenses:Sport'
     HAIRDRESSER = 'Expenses:Hairdresser'
     TUITION_FEES = 'Expenses:Tuition fees'
+    DENTIST = 'Expenses:Dentist'
     TAX = 'Expenses:Tax'
     MISC = 'Expenses:Miscellaneous'
     REPAYMENTS = 'Expenses:Repayments'
@@ -39,9 +41,13 @@ class IncomeAccounts(Enum):
     HEALTH_ALLOWANCE = 'Income:Allowance:Health'
     GIFTS = 'Income:Gifts'
     BOARD_GRANT = 'Income:Board grant'
-    STUDENT_GRANTS_LOANS = 'Income:DUO student grants and loans'
+    STUDENT_GRANTS = 'Income:DUO student grants'
     INVESTMENT_FUND_RETURN = 'Income:Investment fund return'
     OTHER = 'Income:Other'
+
+
+class MiscAccounts(Enum):
+    TRANSFER = 'Transfer'
 
 
 class JournalEntry:
